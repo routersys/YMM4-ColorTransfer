@@ -9,6 +9,8 @@ using Vortice.Mathematics;
 using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Player.Video;
 using YukkuriMovieMaker.Player.Video.Effects;
+using YukkuriMovieMaker.Plugin;
+using YukkuriMovieMaker.Plugin.FileSource;
 using PixelFormat = Vortice.DCommon.PixelFormat;
 
 namespace ColorTransfer
@@ -41,6 +43,10 @@ namespace ColorTransfer
 
         private ITimelineSource? _sceneSource;
         private Guid _sceneSourceId;
+
+        private ID2D1Bitmap? _fileBitmap;
+        private IVideoFileSource? _fileSource;
+        private string _filePath = string.Empty;
 
         private int[] _sourcePixels = [];
         private int[] _referencePixels = [];
@@ -79,6 +85,7 @@ namespace ColorTransfer
             var reference = _item.Reference;
             var sceneId = _item.SceneId;
             var timeOffset = _item.TimeOffset;
+            var filePath = _item.FilePath;
             var branchIndex = _item.BranchIndex;
             var mode = _item.Mode;
             var lightnessAmount = (float)(_item.LightnessAmount.GetValue(frame, length, fps) / 100.0);
@@ -91,6 +98,7 @@ namespace ColorTransfer
                 reference,
                 sceneId,
                 timeOffset,
+                filePath,
                 branchIndex,
                 mode,
                 lightnessAmount,
@@ -107,7 +115,7 @@ namespace ColorTransfer
             ApplyAmounts(
                 _hasTransfer ? lightnessAmount : 0f,
                 _hasTransfer ? colorAmount : 0f,
-                _hasTransfer && reference == ColorTransferReference.Scene ? positionAmount : 0f);
+                _hasTransfer && reference != ColorTransferReference.Branch ? positionAmount : 0f);
 
             _parameters = parameters;
             _isFirst = false;
@@ -124,6 +132,7 @@ namespace ColorTransfer
                 || _parameters.Reference != parameters.Reference
                 || _parameters.SceneId != parameters.SceneId
                 || _parameters.TimeOffset != parameters.TimeOffset
+                || _parameters.FilePath != parameters.FilePath
                 || _parameters.BranchIndex != parameters.BranchIndex
                 || _parameters.Mode != parameters.Mode
                 || _parameters.MaximumGain != parameters.MaximumGain
@@ -170,13 +179,109 @@ namespace ColorTransfer
         private ID2D1Image? ResolveReference(EffectDescription effectDescription, in Parameters parameters, out RawRectF bounds)
         {
             if (parameters.Reference == ColorTransferReference.Scene)
+            {
+                ReleaseFileSource();
                 return ResolveScene(effectDescription, parameters, out bounds);
+            }
 
             ReleaseSceneSource();
+
+            if (parameters.Reference == ColorTransferReference.File)
+                return ResolveFile(effectDescription, parameters, out bounds);
+
+            ReleaseFileSource();
 
             var image = ResolveBranch(effectDescription.DrawDescription, parameters.BranchIndex);
             bounds = image is null ? default : _devices.DeviceContext.GetImageLocalBounds(image);
             return image;
+        }
+
+        private ID2D1Image? ResolveFile(EffectDescription effectDescription, in Parameters parameters, out RawRectF bounds)
+        {
+            bounds = default;
+
+            var path = parameters.FilePath;
+            if (string.IsNullOrEmpty(path))
+            {
+                ReleaseFileSource();
+                return null;
+            }
+
+            if (_filePath != path)
+            {
+                ReleaseFileSource();
+                _filePath = path;
+                if (System.IO.File.Exists(path))
+                    LoadFile(path);
+            }
+
+            ID2D1Image? image;
+            if (_fileBitmap is not null)
+            {
+                image = _fileBitmap;
+            }
+            else if (_fileSource is not null)
+            {
+                _fileSource.Update(ClampTime(_fileSource.Duration, effectDescription.TimelinePosition.Time + parameters.TimeOffset));
+                image = _fileSource.Output;
+            }
+            else
+            {
+                return null;
+            }
+
+            bounds = _devices.DeviceContext.GetImageLocalBounds(image);
+            return image;
+        }
+
+        private void LoadFile(string path)
+        {
+            foreach (var plugin in PluginLoader.ImageFileSourcePlugins)
+            {
+                try
+                {
+                    var bitmap = plugin.CreateBitmap(_devices, path);
+                    if (bitmap is null)
+                        continue;
+                    disposer.Collect(bitmap);
+                    _fileBitmap = bitmap;
+                    return;
+                }
+                catch
+                {
+                }
+            }
+
+            foreach (var plugin in PluginLoader.VideoFileSourcePlugins)
+            {
+                try
+                {
+                    var source = plugin.CreateVideoFileSource(_devices, path);
+                    if (source is null)
+                        continue;
+                    disposer.Collect(source);
+                    _fileSource = source;
+                    return;
+                }
+                catch
+                {
+                }
+            }
+        }
+
+        private void ReleaseFileSource()
+        {
+            if (_fileBitmap is not null)
+                disposer.RemoveAndDispose(ref _fileBitmap);
+            if (_fileSource is not null)
+                disposer.RemoveAndDispose(ref _fileSource);
+            _filePath = string.Empty;
+        }
+
+        private static TimeSpan ClampTime(TimeSpan duration, TimeSpan position)
+        {
+            var last = duration > TimeSpan.Zero ? duration - TimeSpan.FromTicks(1) : TimeSpan.Zero;
+            return position < TimeSpan.Zero ? TimeSpan.Zero : (position > last ? last : position);
         }
 
         private ID2D1Image? ResolveScene(EffectDescription effectDescription, in Parameters parameters, out RawRectF bounds)
@@ -228,10 +333,7 @@ namespace ColorTransfer
                 _sceneSourceId = sceneId;
             }
 
-            var duration = scene.Duration.Time;
-            var position = effectDescription.TimelinePosition.Time + parameters.TimeOffset;
-            var last = duration > TimeSpan.Zero ? duration - TimeSpan.FromTicks(1) : TimeSpan.Zero;
-            var time = position < TimeSpan.Zero ? TimeSpan.Zero : (position > last ? last : position);
+            var time = ClampTime(scene.Duration.Time, effectDescription.TimelinePosition.Time + parameters.TimeOffset);
 
             var previousOwner = _referenceOwner;
             _referenceOwner = _item;
@@ -543,6 +645,7 @@ namespace ColorTransfer
         {
             _effect?.SetInput(0, null, true);
             ReleaseSceneSource();
+            ReleaseFileSource();
             _isFirst = true;
             _hasTransfer = false;
             _lightnessAmount = -1f;
@@ -568,6 +671,7 @@ namespace ColorTransfer
             ColorTransferReference Reference,
             Guid SceneId,
             TimeSpan TimeOffset,
+            string FilePath,
             int BranchIndex,
             ColorTransferMode Mode,
             float LightnessAmount,
