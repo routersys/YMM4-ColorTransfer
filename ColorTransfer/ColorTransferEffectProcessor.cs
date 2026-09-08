@@ -21,16 +21,12 @@ namespace ColorTransfer
     {
         private const int MinimumSampleSize = 32;
         private const int MaximumSampleSize = 512;
+        //参照シーンの入れ子は1段で打ち切る。ColorTransferReferenceScope は直近の owner しか覚えないので、
+        //2段以上を許すなら owner の鎖を辿って自分を隠す必要がある
         private const int MaximumReferenceDepth = 1;
         private const float MaximumBoundsExtent = 16384f;
         private const string BranchNamePrefix = "OutputBranch.Branch";
         private const string CurrentIndexName = "OutputBranch.CurrentIndex";
-
-        [ThreadStatic]
-        private static int _referenceDepth;
-
-        [ThreadStatic]
-        private static ColorTransferEffect? _referenceOwner;
 
         private readonly IGraphicsDevicesAndContext _devices = devices;
         private readonly ColorTransferEffect _item = item;
@@ -71,7 +67,7 @@ namespace ColorTransfer
             if (IsPassThroughEffect || _effect is null || input is null)
                 return effectDescription.DrawDescription;
 
-            if (_referenceDepth > 0 && ReferenceEquals(_referenceOwner, _item))
+            if (ColorTransferReferenceScope.IsOwner(_item))
             {
                 _hasTransfer = false;
                 ApplyAmounts(0f, 0f, 0f);
@@ -297,7 +293,7 @@ namespace ColorTransfer
                 return null;
             }
 
-            if (_referenceDepth >= MaximumReferenceDepth)
+            if (ColorTransferReferenceScope.Depth >= MaximumReferenceDepth)
                 return null;
 
             ISceneInfo? scene = null;
@@ -338,18 +334,8 @@ namespace ColorTransfer
 
             var time = ClampTime(scene.Duration.Time, effectDescription.TimelinePosition.Time + parameters.TimeOffset);
 
-            var previousOwner = _referenceOwner;
-            _referenceOwner = _item;
-            _referenceDepth++;
-            try
-            {
+            using (ColorTransferReferenceScope.Enter(_item))
                 _sceneSource.Update(time, effectDescription.Usage);
-            }
-            finally
-            {
-                _referenceDepth--;
-                _referenceOwner = previousOwner;
-            }
 
             return _sceneSource.Output;
         }
