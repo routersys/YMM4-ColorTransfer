@@ -1,0 +1,9 @@
+<Solution>
+  <Project Path="ColorTransfer/ColorTransfer.csproj">
+    <BuildDependency Project="ColorTransfer.Shader/ColorTransfer.Shader.vcxproj" />
+  </Project>
+  <Project Path="ColorTransfer.Shader/ColorTransfer.Shader.vcxproj">
+    <BuildType Solution="*|*" Project="Release" />
+    <Platform Solution="*|*" Project="Win32" />
+  </Project>
+</Solution>
