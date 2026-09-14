@@ -131,7 +131,17 @@ namespace ColorTransfer
         }
 
         public override IVideoEffectProcessor CreateVideoEffect(IGraphicsDevicesAndContext devices)
-            => new ColorTransferEffectProcessor(devices, this);
+        {
+            try
+            {
+                return new ColorTransferEffectProcessor(devices, this);
+            }
+            catch (Exception exception)
+            {
+                ColorTransferTelemetry.Report(exception);
+                throw;
+            }
+        }
 
         protected override IEnumerable<IAnimatable> GetAnimatables()
             => _animatables ??= [LightnessAmount, ColorAmount, PositionAmount];

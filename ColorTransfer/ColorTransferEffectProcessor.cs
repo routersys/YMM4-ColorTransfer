@@ -67,6 +67,19 @@ namespace ColorTransfer
 
         public override DrawDescription Update(EffectDescription effectDescription)
         {
+            try
+            {
+                return UpdateCore(effectDescription);
+            }
+            catch (Exception exception)
+            {
+                ColorTransferTelemetry.Report(exception);
+                throw;
+            }
+        }
+
+        private DrawDescription UpdateCore(EffectDescription effectDescription)
+        {
             if (IsPassThroughEffect || _effect is null || input is null)
                 return effectDescription.DrawDescription;
 
@@ -697,6 +710,19 @@ namespace ColorTransfer
         }
 
         protected override void ClearEffectChain()
+        {
+            try
+            {
+                ClearEffectChainCore();
+            }
+            catch (Exception exception)
+            {
+                ColorTransferTelemetry.Report(exception);
+                throw;
+            }
+        }
+
+        private void ClearEffectChainCore()
         {
             _isInputHidden = false;
             _effect?.SetInput(0, null, true);

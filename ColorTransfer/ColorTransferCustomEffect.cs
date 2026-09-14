@@ -111,6 +111,19 @@ namespace ColorTransfer
                 if (drawInformation is null)
                     return;
 
+                try
+                {
+                    WriteConstants(drawInformation);
+                }
+                catch (Exception exception)
+                {
+                    ColorTransferTelemetry.Report(exception);
+                    throw;
+                }
+            }
+
+            private void WriteConstants(ID2D1DrawInfo drawInformation)
+            {
                 Span<byte> buffer = stackalloc byte[ConstantBufferByteSize];
                 MemoryMarshal.Write(buffer, in _cb);
                 _lut.CopyTo(buffer[HeaderByteSize..]);
