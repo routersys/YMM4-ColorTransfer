@@ -21,7 +21,7 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{5a891f98-980e-4661-a9ad-5e97a7eed037}</ProjectGuid>
+    <ProjectGuid>{DE1D6B5D-5604-B8C2-2742-2E0E93AD0A4D}</ProjectGuid>
     <RootNamespace>ColorTransferShader</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
