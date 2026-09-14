@@ -11,6 +11,8 @@ YukkuriMovieMaker4（YMM4）上で動作する、アイテムの色をほかの�
 明るさと色みを別々に扱い、平均だけ、平均と広がり、分布全体の 3 つの合わせ方から選べます。
 [YukkuriMovieMaker.Plugin.Community](https://github.com/manju-summoner/YukkuriMovieMaker.Plugin.Community) に提案して取り込まれた「色調転写」を単独のプラグインにしたもので、取り込みの際に manju summoner 氏が加えた修正を含みます。
 
+![Image](https://github.com/routersys/YMM4-ColorTransfer/blob/main/docs/ColorTransfer.png)
+
 ---
 
 ## 目次
