@@ -17,6 +17,7 @@ namespace ColorTransfer
         public ColorTransferEffect()
         {
             ColorTransferTelemetry.EnsureStartedOnce();
+            ColorTransferUpdateNotifier.EnsureCheckedOnce();
         }
 
         public override string Label => Texts.ColorTransferEffectName;

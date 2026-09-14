@@ -40,3 +40,4 @@ ColorTransferSampleSizeDescription,,色分布を調べるときの縮小後の�
 TagColorTransfer,,色調転写,Color transfer,色调转移,色調轉移,색조 전사,Transferencia de color,نقل الألوان,Transfer warna
 TagColorMatch,,カラーマッチ,Color match,色彩匹配,色彩匹配,컬러 매치,Coincidencia de color,مطابقة الألوان,Pencocokan warna
 TagGrading,,カラーグレーディング,Color grading,调色,調色,컬러 그레이딩,Etalonaje de color,تدريج الألوان,Gradasi warna
+UpdateAvailableMessage,,新しいバージョン {0} が公開されています。,A new version {0} is available.,已发布新版本 {0}。,已發布新版本 {0}。,새 버전 {0}이(가) 공개되었습니다.,La nueva versión {0} está disponible.,الإصدار الجديد {0} متاح الآن.,Versi baru {0} telah tersedia.
