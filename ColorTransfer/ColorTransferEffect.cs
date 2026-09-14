@@ -5,12 +5,14 @@ using YukkuriMovieMaker.Controls;
 using YukkuriMovieMaker.Exo;
 using YukkuriMovieMaker.ItemEditor.CustomVisibilityAttributes;
 using YukkuriMovieMaker.Player.Video;
+using YukkuriMovieMaker.Plugin;
 using YukkuriMovieMaker.Plugin.Effects;
 using YukkuriMovieMaker.Project;
 using YukkuriMovieMaker.Settings;
 
 namespace ColorTransfer
 {
+    [PluginDetails(AuthorName = "routersys")]
     [VideoEffect(nameof(Texts.ColorTransferEffectName), [VideoEffectCategories.Filtering], [nameof(Texts.TagColorTransfer), nameof(Texts.TagColorMatch), nameof(Texts.TagGrading)], IsAviUtlSupported = false, ResourceType = typeof(Texts))]
     public sealed class ColorTransferEffect : VideoEffectBase
     {
