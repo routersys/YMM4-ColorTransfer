@@ -1,4 +1,4 @@
-# ColorTransfer for YMM4
+# 色調転写 for YMM4
 
 [![License](https://img.shields.io/badge/license-LGPL--3.0-blue.svg)](#)
 [![.NET](https://img.shields.io/badge/.NET-10.0-purple.svg)](#)
