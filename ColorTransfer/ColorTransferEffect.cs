@@ -14,6 +14,11 @@ namespace ColorTransfer
     [VideoEffect(nameof(Texts.ColorTransferEffectName), [VideoEffectCategories.Filtering], [nameof(Texts.TagColorTransfer), nameof(Texts.TagColorMatch), nameof(Texts.TagGrading)], IsAviUtlSupported = false, ResourceType = typeof(Texts))]
     public sealed class ColorTransferEffect : VideoEffectBase
     {
+        public ColorTransferEffect()
+        {
+            ColorTransferTelemetry.EnsureStartedOnce();
+        }
+
         public override string Label => Texts.ColorTransferEffectName;
 
         [Display(GroupName = nameof(Texts.ColorTransferEffectName), Name = nameof(Texts.ColorTransferReference), Description = nameof(Texts.ColorTransferReferenceDescription), Order = 0, ResourceType = typeof(Texts))]
