@@ -140,6 +140,7 @@ YukkuriMovieMaker.Plugin.Community に提案して取り込まれた「色調転
 --------------------------------------------------------------------------------
   GNU Lesser General Public License version 3
   https://github.com/routersys/YMM4-ColorTransfer
+  ライセンスの全文は同梱の LICENSE フォルダーに収録しています。
   YukkuriMovieMaker.Plugin.Community に取り込まれた版の修正を含むため、
   同リポジトリと同じライセンスで公開しています。manju summoner 氏による
   修正の著作権は同氏にあります。

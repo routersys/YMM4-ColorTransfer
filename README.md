@@ -201,4 +201,4 @@ YukkuriMovieMaker4（YMM4）上で動作する、アイテムの色をほかの�
 
 [GNU Lesser General Public License version 3](LICENSE.txt)
 
-YukkuriMovieMaker.Plugin.Community に取り込まれた版の修正を含むため、同リポジトリと同じライセンスで公開しています。manju summoner 氏による修正の著作権は同氏にあります。
+ライセンスの全文は、リポジトリの `LICENSE.txt` と、配布パッケージの `LICENSE` フォルダーに収録しています。YukkuriMovieMaker.Plugin.Community に取り込まれた版の修正を含むため、同リポジトリと同じライセンスで公開しています。manju summoner 氏による修正の著作権は同氏にあります。
